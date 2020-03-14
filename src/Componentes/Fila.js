@@ -1,16 +1,13 @@
-import React, { Component } from "react";
+import React from "react";
 import Columna from "./Columna";
 
 class Fila extends React.Component {
-  constructor(props) {
-    super(props);
-  }
 
   render() {
     const cols = [];
     for (var i = 0; i < 3; i++) {
       var id = this.props.row * 3 + i;
-      var marking = this.props.boardState[id];
+      var marking = this.props.estadoTablero[id];
       cols.push(
         <Columna
           key={id + "-" + marking}

@@ -1,15 +1,15 @@
-import React, { Component } from "react";
+import React from "react";
 import "bootstrap/dist/css/bootstrap.css";
 import Fila from "./Componentes/Fila";
 import "./Estilos/Principal.css";
 
-var symbolsMap = {
+var mapaSimbolos = {
   2: ["marking", "32"],
   0: ["marking marking-x", 9587],
   1: ["marking marking-o", 9711]
 };
 
-var patterns = [
+var patrones = [
   //horizontal
   [0, 1, 2],
   [3, 4, 5],
@@ -29,7 +29,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      boardState: new Array(9).fill(2),
+      estadoTablero: new Array(9).fill(2),
       turn: 0,
       active: true,
       mode: "AI"
@@ -43,18 +43,18 @@ class App extends React.Component {
 
   processBoard() {
     var won = false;
-    patterns.forEach(pattern => {
-      var firstMark = this.state.boardState[pattern[0]];
+    patrones.forEach(pattern => {
+      var firstMark = this.state.estadoTablero[pattern[0]];
 
-      if (firstMark != 2) {
-        var marks = this.state.boardState.filter((mark, index) => {
-          return pattern.includes(index) && mark == firstMark; //looks for marks matching the first in pattern's index
+      if (firstMark !== 2) {
+        var marks = this.state.estadoTablero.filter((mark, index) => {
+          return pattern.includes(index) && mark === firstMark; //looks for marks matching the first in pattern's index
         });
 
-        if (marks.length == 3) {
-          document.querySelector("#message1").innerHTML =
-            String.fromCharCode(symbolsMap[marks[0]][1]) + " wins!";
-          document.querySelector("#message1").style.display = "block";
+        if (marks.length === 3) {
+          document.querySelector("#mensaje1").innerHTML =
+            String.fromCharCode(mapaSimbolos[marks[0]][1]) + " wins!";
+          document.querySelector("#mensaje1").style.display = "block";
           pattern.forEach(index => {
             var id = index + "-" + firstMark;
             document.getElementById(id).parentNode.style.background = "#d4edda";
@@ -65,11 +65,11 @@ class App extends React.Component {
       }
     });
 
-    if (!this.state.boardState.includes(2) && !won) {
-      document.querySelector("#message2").innerHTML = "Game Over - It's a draw";
-      document.querySelector("#message2").style.display = "block";
+    if (!this.state.estadoTablero.includes(2) && !won) {
+      document.querySelector("#mensaje2").innerHTML = "Game Over - It's a draw";
+      document.querySelector("#mensaje2").style.display = "block";
       this.setState({ active: false });
-    } else if (this.state.mode == "AI" && this.state.turn == 1 && !won) {
+    } else if (this.state.mode === "AI" && this.state.turn === 1 && !won) {
       this.makeAIMove();
     }
   }
@@ -77,20 +77,20 @@ class App extends React.Component {
   makeAIMove() {
     var emptys = [];
     var scores = [];
-    this.state.boardState.forEach((mark, index) => {
-      if (mark == 2) emptys.push(index);
+    this.state.estadoTablero.forEach((mark, index) => {
+      if (mark === 2) emptys.push(index);
     });
 
     emptys.forEach(index => {
       var score = 0;
-      patterns.forEach(pattern => {
+      patrones.forEach(pattern => {
         if (pattern.includes(index)) {
           var xCount = 0;
           var oCount = 0;
           pattern.forEach(p => {
-            if (this.state.boardState[p] == 0) xCount += 1;
-            else if (this.state.boardState[p] == 1) oCount += 1;
-            score += p == index ? 0 : AIScore[this.state.boardState[p]];
+            if (this.state.estadoTablero[p] === 0) xCount += 1;
+            else if (this.state.estadoTablero[p] === 1) oCount += 1;
+            score += p === index ? 0 : AIScore[this.state.estadoTablero[p]];
           });
           if (xCount >= 2) score += 10;
           if (oCount >= 2) score += 20;
@@ -116,7 +116,7 @@ class App extends React.Component {
       .querySelectorAll(".alert")
       .forEach(el => (el.style.display = "none"));
     this.setState({
-      boardState: new Array(9).fill(2),
+      estadoTablero: new Array(9).fill(2),
       turn: 0,
       active: true
     });
@@ -125,10 +125,10 @@ class App extends React.Component {
     this.setState(
       prevState => {
         return {
-          boardState: prevState.boardState
+          estadoTablero: prevState.estadoTablero
             .slice(0, id)
             .concat(prevState.turn)
-            .concat(prevState.boardState.slice(id + 1)),
+            .concat(prevState.estadoTablero.slice(id + 1)),
           turn: (prevState.turn + 1) % 2
         };
       },
@@ -159,7 +159,7 @@ class App extends React.Component {
       rows.push(
         <Fila
           row={i}
-          boardState={this.state.boardState}
+          estadoTablero={this.state.estadoTablero}
           onNewMove={this.handleNewMove}
           active={this.state.active}
         />
@@ -178,15 +178,15 @@ class App extends React.Component {
               2 Players
             </a>{" "}
             ||
-            <a href="#" onClick={this.handleReset}>
+            <button href="#" onClick={this.handleReset}>
               {" "}
               Reset board
-            </a>
+            </button>
           </p>
-          <p>{String.fromCharCode(symbolsMap[this.state.turn][1])}'s turn</p>
+          <p>{String.fromCharCode(mapaSimbolos[this.state.turn][1])}'s turn</p>
           <div className="board">{rows}</div>
-          <p class="alert alert-success" role="alert" id="message1"></p>
-          <p class="alert alert-info" role="alert" id="message2"></p>
+          <p class="alert alert-success" role="alert" id="mensaje1"></p>
+          <p class="alert alert-info" role="alert" id="mensaje2"></p>
         </div>
       </div>
     );
