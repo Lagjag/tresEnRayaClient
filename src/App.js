@@ -37,11 +37,11 @@ class App extends React.Component {
     this.handleNewMove = this.handleNewMove.bind(this);
     this.handleReset = this.handleReset.bind(this);
     this.handleModeChange = this.handleModeChange.bind(this);
-    this.processBoard = this.processBoard.bind(this);
-    this.makeAIMove = this.makeAIMove.bind(this);
+    this.procesarTablero = this.procesarTablero.bind(this);
+    this.movimientoIA = this.movimientoIA.bind(this);
   }
 
-  processBoard() {
+  procesarTablero() {
     var won = false;
     patrones.forEach(pattern => {
       var firstMark = this.state.estadoTablero[pattern[0]];
@@ -70,11 +70,11 @@ class App extends React.Component {
       document.querySelector("#mensaje2").style.display = "block";
       this.setState({ active: false });
     } else if (this.state.mode === "AI" && this.state.turn === 1 && !won) {
-      this.makeAIMove();
+      this.movimientoIA();
     }
   }
 
-  makeAIMove() {
+  movimientoIA() {
     var emptys = [];
     var scores = [];
     this.state.estadoTablero.forEach((mark, index) => {
@@ -122,6 +122,11 @@ class App extends React.Component {
     });
   }
   handleNewMove(id) {
+    console.log("id:"+ typeof this.state.estadoTablero
+    .slice(0, id)
+    .concat(this.state.turn)
+    .concat(this.state.estadoTablero.slice(id + 1)));
+    console.log("turno: "+(this.state.turn + 1) % 2 );
     this.setState(
       prevState => {
         return {
@@ -133,7 +138,7 @@ class App extends React.Component {
         };
       },
       () => {
-        this.processBoard();
+        this.procesarTablero();
       }
     );
   }
@@ -158,6 +163,7 @@ class App extends React.Component {
     for (var i = 0; i < 3; i++)
       rows.push(
         <Fila
+          key={i}
           row={i}
           estadoTablero={this.state.estadoTablero}
           onNewMove={this.handleNewMove}
@@ -166,16 +172,16 @@ class App extends React.Component {
       );
     return (
       <div>
-        <div class="container jumbotron" id="container">
-          <h3>TIC TAC TOE</h3>
+        <div className="container jumbotron" id="container">
+          <h3>TRES EN RAYA</h3>
           <p>
             <a href="./?AI" onClick={this.handleModeChange} id="ai">
-              Versus AI
+              Contra IA
             </a>{" "}
             ||
             <a href="./?2P" onClick={this.handleModeChange} id="twop">
               {" "}
-              2 Players
+              2 Jugadores
             </a>{" "}
             ||
             <button href="#" onClick={this.handleReset}>
@@ -185,8 +191,8 @@ class App extends React.Component {
           </p>
           <p>{String.fromCharCode(mapaSimbolos[this.state.turn][1])}'s turn</p>
           <div className="board">{rows}</div>
-          <p class="alert alert-success" role="alert" id="mensaje1"></p>
-          <p class="alert alert-info" role="alert" id="mensaje2"></p>
+          <p className="alert alert-success" role="alert" id="mensaje1"></p>
+          <p className="alert alert-info" role="alert" id="mensaje2"></p>
         </div>
       </div>
     );
