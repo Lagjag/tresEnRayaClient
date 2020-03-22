@@ -9,14 +9,14 @@ var mapaSimbolos = {
 class Column extends React.Component {
   constructor(props) {
     super(props);
-    this.handleNewMove = this.handleNewMove.bind(this);
+    this.nuevoMovimiento = this.nuevoMovimiento.bind(this);
   }
   
-  handleNewMove(e) {
+  nuevoMovimiento(e) {
     if (!this.props.active) {
       document.querySelector("#mensaje1").style.display = "none";
       document.querySelector("#mensaje2").innerHTML =
-        "Game is already over! Reset if you want to play again.";
+        "Juego terminado, pulsa reset si quieres volver a jugar.";
       document.querySelector("#mensaje2").style.display = "block";
       return false;
     } else if (this.props.marking === 2)
@@ -25,7 +25,7 @@ class Column extends React.Component {
 
   render() {
     return (
-      <div className="col" onClick={this.handleNewMove}>
+      <div className="col" onClick={this.nuevoMovimiento}>
         <div className={mapaSimbolos[this.props.marking][0]} id={this.props.id}>
           {String.fromCharCode(mapaSimbolos[this.props.marking][1])}
         </div>

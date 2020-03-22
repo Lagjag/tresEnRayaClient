@@ -1,4 +1,5 @@
 import React from "react";
+import axios from 'axios';
 import "bootstrap/dist/css/bootstrap.css";
 import Fila from "./Componentes/Fila";
 import "./Estilos/Principal.css";
@@ -29,49 +30,76 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      idTablero: '',
       estadoTablero: new Array(9).fill(2),
-      turn: 0,
+      turno: 0,
       active: true,
-      mode: "AI"
+      modo_juego: "IA"
     };
-    this.handleNewMove = this.handleNewMove.bind(this);
+    this.nuevoMovimiento = this.nuevoMovimiento.bind(this);
     this.handleReset = this.handleReset.bind(this);
     this.handleModeChange = this.handleModeChange.bind(this);
     this.procesarTablero = this.procesarTablero.bind(this);
     this.movimientoIA = this.movimientoIA.bind(this);
   }
 
-  procesarTablero() {
-    var won = false;
-    patrones.forEach(pattern => {
-      var firstMark = this.state.estadoTablero[pattern[0]];
+  componentDidMount(){
 
-      if (firstMark !== 2) {
-        var marks = this.state.estadoTablero.filter((mark, index) => {
-          return pattern.includes(index) && mark === firstMark; //looks for marks matching the first in pattern's index
+    const BASE_URL = process.env.REACT_APP_API_SYMFONY;
+
+    axios.get(BASE_URL+'recuperar_tablero')
+    .then((response) => {
+
+      console.log(response.data);
+      if(response.data.tablero !== '' && response.data.turno !== '' && response.data.modo_juego !== '' && response.data.existe !== false){
+        this.setState({
+          idTablero: response.data.id,
+          estadoTablero: response.data.tablero,
+          turno: response.data.turno,
+          modo_juego: response.data.modo_juego
         });
-
-        if (marks.length === 3) {
-          document.querySelector("#mensaje1").innerHTML =
-            String.fromCharCode(mapaSimbolos[marks[0]][1]) + " wins!";
-          document.querySelector("#mensaje1").style.display = "block";
-          pattern.forEach(index => {
-            var id = index + "-" + firstMark;
-            document.getElementById(id).parentNode.style.background = "#d4edda";
-          });
-          this.setState({ active: false });
-          won = true;
-        }
+      }else{
+        axios.post(BASE_URL+'crear_tablero', this.state.estadoTablero)
+        .then(res => console.log(res.data));
       }
-    });
+    })
+    .catch(function (error) {
 
-    if (!this.state.estadoTablero.includes(2) && !won) {
-      document.querySelector("#mensaje2").innerHTML = "Game Over - It's a draw";
-      document.querySelector("#mensaje2").style.display = "block";
-      this.setState({ active: false });
-    } else if (this.state.mode === "AI" && this.state.turn === 1 && !won) {
-      this.movimientoIA();
+      console.log(error);
+    })
+  }
+
+  procesarTablero() {
+
+    const BASE_URL = process.env.REACT_APP_API_SYMFONY;
+    const tablero = {
+      estado: this.state.estadoTablero,
+      turno: this.state.turno,
+      modo_juego: this.state.modo_juego
     }
+    axios.put(BASE_URL+'modificar_tablero', tablero)
+        .then((response) => { 
+          
+          if(response.data.casillasGanadoras !== ''){
+            document.querySelector("#mensaje1").innerHTML =
+            String.fromCharCode(mapaSimbolos[response.data.casillasMarcadas[0]][1]) + " gana!";
+            document.querySelector("#mensaje1").style.display = "block";
+            console.log(response.data.casillasGanadoras);
+            response.data.casillasGanadoras.forEach(id => {
+              document.getElementById(id).parentNode.style.background = "#d4edda";
+            });
+            this.setState({ active: false });
+          }
+          
+          if(response.data.movimiento === 'empatado'){
+            document.querySelector("#mensaje2").innerHTML = "Empate, fin del juego";
+            document.querySelector("#mensaje2").style.display = "block";
+            this.setState({ active: false });
+          }else if(response.data.movimiento === 'IA'){
+            this.movimientoIA();
+          }
+
+        });
   }
 
   movimientoIA() {
@@ -107,7 +135,7 @@ class App extends React.Component {
       }
       return maxVal;
     });
-    this.handleNewMove(emptys[maxIndex]);
+    this.nuevoMovimiento(emptys[maxIndex]);
   }
 
   handleReset(e) {
@@ -117,24 +145,32 @@ class App extends React.Component {
       .forEach(el => (el.style.display = "none"));
     this.setState({
       estadoTablero: new Array(9).fill(2),
-      turn: 0,
+      turno: 0,
       active: true
     });
   }
-  handleNewMove(id) {
-    console.log("id:"+ typeof this.state.estadoTablero
-    .slice(0, id)
-    .concat(this.state.turn)
-    .concat(this.state.estadoTablero.slice(id + 1)));
-    console.log("turno: "+(this.state.turn + 1) % 2 );
+  nuevoMovimiento(id) {
+    const BASE_URL = process.env.REACT_APP_API_SYMFONY;
+
+    const tablero = {
+      idCasilla: id,
+      estado: this.state.estadoTablero,
+      turno: this.state.turno,
+      modo_juego: this.state.modo_juego,
+      accion: 'nuevoMovimiento'
+    }
+    axios.put(BASE_URL+'grabar_tablero/'+this.state.idTablero, tablero)
+        .then((response) => { 
+          console.log(response);
+        });
     this.setState(
       prevState => {
         return {
           estadoTablero: prevState.estadoTablero
             .slice(0, id)
-            .concat(prevState.turn)
+            .concat(prevState.turno)
             .concat(prevState.estadoTablero.slice(id + 1)),
-          turn: (prevState.turn + 1) % 2
+          turno: (prevState.turno + 1) % 2
         };
       },
       () => {
@@ -145,15 +181,15 @@ class App extends React.Component {
 
   handleModeChange(e) {
     e.preventDefault();
-    if (e.target.getAttribute("href").includes("AI")) {
+    if (e.target.getAttribute("href").includes("IA")) {
       e.target.style.background = "#d4edda";
       document.querySelector("#twop").style.background = "none";
-      this.setState({ mode: "AI" });
+      this.setState({ modo_juego: "IA" });
       this.handleReset(null);
-    } else if (e.target.getAttribute("href").includes("2P")) {
+    } else if (e.target.getAttribute("href").includes("2J")) {
       e.target.style.background = "#d4edda";
-      document.querySelector("#ai").style.background = "none";
-      this.setState({ mode: "2P" });
+      document.querySelector("#ia").style.background = "none";
+      this.setState({ modo_juego: "2J" });
       this.handleReset(null);
     }
   }
@@ -166,7 +202,7 @@ class App extends React.Component {
           key={i}
           row={i}
           estadoTablero={this.state.estadoTablero}
-          onNewMove={this.handleNewMove}
+          onNewMove={this.nuevoMovimiento}
           active={this.state.active}
         />
       );
@@ -175,21 +211,21 @@ class App extends React.Component {
         <div className="container jumbotron" id="container">
           <h3>TRES EN RAYA</h3>
           <p>
-            <a href="./?AI" onClick={this.handleModeChange} id="ai">
+            <a href="./?IA" onClick={this.handleModeChange} id="ia">
               Contra IA
             </a>{" "}
             ||
-            <a href="./?2P" onClick={this.handleModeChange} id="twop">
+            <a href="./?2J" onClick={this.handleModeChange} id="twop">
               {" "}
               2 Jugadores
             </a>{" "}
             ||
             <button href="#" onClick={this.handleReset}>
               {" "}
-              Reset board
+              Limpiar tablero
             </button>
           </p>
-          <p>{String.fromCharCode(mapaSimbolos[this.state.turn][1])}'s turn</p>
+          <p>Turno del jugador {String.fromCharCode(mapaSimbolos[this.state.turno][1])}</p>
           <div className="board">{rows}</div>
           <p className="alert alert-success" role="alert" id="mensaje1"></p>
           <p className="alert alert-info" role="alert" id="mensaje2"></p>
