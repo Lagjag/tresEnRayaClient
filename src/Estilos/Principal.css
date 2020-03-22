@@ -29,7 +29,7 @@
     display: none;
   }
   
-  .board {
+  .tablero {
     margin: 0 33%;
     max-width: 190px;
   }
@@ -42,7 +42,7 @@
     background: #d4edda;
   }
   
-  #container {
+  #contenedor {
     width: 600px;
     height: 500px;
   }

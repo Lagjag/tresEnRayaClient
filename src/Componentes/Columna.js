@@ -20,7 +20,7 @@ class Column extends React.Component {
       document.querySelector("#mensaje2").style.display = "block";
       return false;
     } else if (this.props.marking === 2)
-      this.props.onNewMove(parseInt(e.target.id));
+      this.props.enNuevoMovimiento(parseInt(e.target.id));
   }
 
   render() {

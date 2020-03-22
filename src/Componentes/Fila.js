@@ -13,7 +13,7 @@ class Fila extends React.Component {
           key={id + "-" + marking}
           id={id + "-" + marking}
           marking={marking}
-          onNewMove={this.props.onNewMove}
+          enNuevoMovimiento={this.props.enNuevoMovimiento}
           active={this.props.active}
         />
       );

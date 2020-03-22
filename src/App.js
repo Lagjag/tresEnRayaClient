@@ -37,8 +37,8 @@ class App extends React.Component {
       modo_juego: "IA"
     };
     this.nuevoMovimiento = this.nuevoMovimiento.bind(this);
-    this.handleReset = this.handleReset.bind(this);
-    this.handleModeChange = this.handleModeChange.bind(this);
+    this.reinicio = this.reinicio.bind(this);
+    this.cambioDeModo = this.cambioDeModo.bind(this);
     this.procesarTablero = this.procesarTablero.bind(this);
     this.movimientoIA = this.movimientoIA.bind(this);
   }
@@ -50,7 +50,6 @@ class App extends React.Component {
     axios.get(BASE_URL+'recuperar_tablero')
     .then((response) => {
 
-      console.log(response.data);
       if(response.data.tablero !== '' && response.data.turno !== '' && response.data.modo_juego !== '' && response.data.existe !== false){
         this.setState({
           idTablero: response.data.id,
@@ -58,6 +57,13 @@ class App extends React.Component {
           turno: response.data.turno,
           modo_juego: response.data.modo_juego
         });
+        if(response.data.modo_juego === "IA"){
+          document.querySelector("#ia").style.background = "#d4edda";
+          document.querySelector("#dosj").style.background = "none";
+        }else if(response.data.modo_juego === "2J"){
+          document.querySelector("#ia").style.background = "none";
+          document.querySelector("#dosj").style.background = "#d4edda";
+        }
       }else{
         axios.post(BASE_URL+'crear_tablero', this.state.estadoTablero)
         .then(res => console.log(res.data));
@@ -138,17 +144,25 @@ class App extends React.Component {
     this.nuevoMovimiento(emptys[maxIndex]);
   }
 
-  handleReset(e) {
+  reinicio(e) {
     if (e) e.preventDefault();
-    document
-      .querySelectorAll(".alert")
-      .forEach(el => (el.style.display = "none"));
-    this.setState({
-      estadoTablero: new Array(9).fill(2),
-      turno: 0,
-      active: true
-    });
+    const BASE_URL = process.env.REACT_APP_API_SYMFONY;
+
+    const tablero = {
+      accion: 'resetTablero'
+    }
+    axios.put(BASE_URL+'grabar_tablero/'+this.state.idTablero, tablero)
+      .then((response) => { 
+        console.log(response)
+        document.querySelectorAll(".alert").forEach(el => (el.style.display = "none"));
+        this.setState({
+          estadoTablero: response.data.tablero,
+          turno: response.data.turno,
+          active: true
+        });
+      });
   }
+
   nuevoMovimiento(id) {
     const BASE_URL = process.env.REACT_APP_API_SYMFONY;
 
@@ -156,42 +170,49 @@ class App extends React.Component {
       idCasilla: id,
       estado: this.state.estadoTablero,
       turno: this.state.turno,
-      modo_juego: this.state.modo_juego,
       accion: 'nuevoMovimiento'
     }
     axios.put(BASE_URL+'grabar_tablero/'+this.state.idTablero, tablero)
-        .then((response) => { 
-          console.log(response);
-        });
-    this.setState(
-      prevState => {
-        return {
-          estadoTablero: prevState.estadoTablero
-            .slice(0, id)
-            .concat(prevState.turno)
-            .concat(prevState.estadoTablero.slice(id + 1)),
-          turno: (prevState.turno + 1) % 2
-        };
-      },
-      () => {
-        this.procesarTablero();
-      }
-    );
+      .then((response) => { 
+        this.setState(
+          prevState => {
+            return {
+              estadoTablero: response.data.tablero,
+              turno: response.data.turno
+            };
+          },
+          () => {
+            this.procesarTablero();
+          }
+        );
+      });
   }
 
-  handleModeChange(e) {
+  cambioDeModo(e) {
     e.preventDefault();
-    if (e.target.getAttribute("href").includes("IA")) {
-      e.target.style.background = "#d4edda";
-      document.querySelector("#twop").style.background = "none";
-      this.setState({ modo_juego: "IA" });
-      this.handleReset(null);
-    } else if (e.target.getAttribute("href").includes("2J")) {
-      e.target.style.background = "#d4edda";
-      document.querySelector("#ia").style.background = "none";
-      this.setState({ modo_juego: "2J" });
-      this.handleReset(null);
+
+    const BASE_URL = process.env.REACT_APP_API_SYMFONY;
+
+    const tablero = {
+      modoJuego: e.target.getAttribute("href"),
+      accion: 'cambioModo'
     }
+
+    axios.put(BASE_URL+'grabar_tablero/'+this.state.idTablero, tablero)
+      .then((response) => { 
+        console.log(response.data.modoJuego);
+        if(response.data.modoJuego === 'IA'){
+          document.querySelector("#ia").style.background = "#d4edda";
+          document.querySelector("#dosj").style.background = "none";
+          this.setState({ modo_juego: "IA" });
+          this.reinicio(null);
+        }else if(response.data.modoJuego === '"2J'){
+          document.querySelector("#dosj").style.background = "#d4edda";
+          document.querySelector("#ia").style.background = "none";
+          this.setState({ modo_juego: "2J" });
+          this.reinicio(null);
+        }
+      });
   }
 
   render() {
@@ -202,31 +223,31 @@ class App extends React.Component {
           key={i}
           row={i}
           estadoTablero={this.state.estadoTablero}
-          onNewMove={this.nuevoMovimiento}
+          enNuevoMovimiento={this.nuevoMovimiento}
           active={this.state.active}
         />
       );
     return (
       <div>
-        <div className="container jumbotron" id="container">
+        <div className="container jumbotron" id="contenedor">
           <h3>TRES EN RAYA</h3>
           <p>
-            <a href="./?IA" onClick={this.handleModeChange} id="ia">
+            <a href="./?IA" onClick={this.cambioDeModo} id="ia">
               Contra IA
             </a>{" "}
             ||
-            <a href="./?2J" onClick={this.handleModeChange} id="twop">
+            <a href="./?2J" onClick={this.cambioDeModo} id="dosj">
               {" "}
               2 Jugadores
             </a>{" "}
             ||
-            <button href="#" onClick={this.handleReset}>
+            <button href="#" onClick={this.reinicio}>
               {" "}
               Limpiar tablero
             </button>
           </p>
           <p>Turno del jugador {String.fromCharCode(mapaSimbolos[this.state.turno][1])}</p>
-          <div className="board">{rows}</div>
+          <div className="tablero">{rows}</div>
           <p className="alert alert-success" role="alert" id="mensaje1"></p>
           <p className="alert alert-info" role="alert" id="mensaje2"></p>
         </div>
