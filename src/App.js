@@ -41,24 +41,21 @@ class App extends React.Component {
       );
     return (
       <div>
-        <div className="container jumbotron" id="contenedor">
-          <h3>TRES EN RAYA</h3>
+        <div className="container background-3d jumbotron" id="contenedor">
+          <h3 className="letra-amarilla">TRES EN RAYA</h3>
           <p>
-            <a href="./?IA" onClick={this.cambioDeModo} id="ia">
+            <a href="./?IA" className="boton-menu" onClick={this.cambioDeModo} id="ia">
               Contra IA
-            </a>{" "}
+            </a>
             ||
-            <a href="./?2J" onClick={this.cambioDeModo} id="dosj">
-              {" "}
+            <a href="./?2J" className="boton-menu" onClick={this.cambioDeModo} id="dosj">
               2 Jugadores
-            </a>{" "}
-            ||
-            <button href="#" onClick={this.reinicio}>
-              {" "}
+            </a>
+            <a href="/" className="boton-menu" onClick={this.reinicio}>
               Limpiar tablero
-            </button>
+            </a>
           </p>
-          <p>Turno del jugador {String.fromCharCode(mapaSimbolos[this.state.turno][1])}</p>
+          <p className="letra-amarilla letra-cartel">Turno del jugador {String.fromCharCode(mapaSimbolos[this.state.turno][1])}</p>
           <div className="tablero">{filas}</div>
           <p className="alert alert-success" role="alert" id="mensaje1"></p>
           <p className="alert alert-info" role="alert" id="mensaje2"></p>
@@ -82,11 +79,11 @@ class App extends React.Component {
           modo_juego: response.data.modo_juego
         });
         if(response.data.modo_juego === "IA"){
-          document.querySelector("#ia").style.background = "#d4edda";
-          document.querySelector("#dosj").style.background = "none";
+          document.querySelector("#ia").style.background = "blue";
+          document.querySelector("#dosj").style.background = "#77b55a";
         }else if(response.data.modo_juego === "2J"){
-          document.querySelector("#ia").style.background = "none";
-          document.querySelector("#dosj").style.background = "#d4edda";
+          document.querySelector("#ia").style.background = "#77b55a";
+          document.querySelector("#dosj").style.background = "blue";
         }
       }else{
         axios.post(BASE_URL+'crear_tablero', this.state.estadoTablero)
@@ -201,13 +198,13 @@ class App extends React.Component {
     axios.put(BASE_URL+'grabar_tablero/'+this.state.idTablero, tablero)
       .then((response) => { 
         if(response.data.modoJuego === 'IA'){
-          document.querySelector("#ia").style.background = "#d4edda";
-          document.querySelector("#dosj").style.background = "none";
+          document.querySelector("#ia").style.background = "blue";
+          document.querySelector("#dosj").style.background = "#77b55a";
           this.setState({ modo_juego: "IA" });
           this.reinicio(null);
         }else if(response.data.modoJuego === '2J'){
-          document.querySelector("#dosj").style.background = "#d4edda";
-          document.querySelector("#ia").style.background = "none";
+          document.querySelector("#dosj").style.background = "blue";
+          document.querySelector("#ia").style.background = "#77b55a";
           this.setState({ modo_juego: "2J" });
           this.reinicio(null);
         }
