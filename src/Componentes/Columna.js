@@ -16,7 +16,7 @@ class Column extends React.Component {
     if (!this.props.active) {
       document.querySelector("#mensaje1").style.display = "none";
       document.querySelector("#mensaje2").innerHTML =
-        "Juego terminado, pulsa reset si quieres volver a jugar.";
+        "Juego terminado, pulsa limpiar tablero si quieres volver a jugar.";
       document.querySelector("#mensaje2").style.display = "block";
       return false;
     } else if (this.props.marking === 2)
