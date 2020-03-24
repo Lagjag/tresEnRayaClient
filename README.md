@@ -1,3 +1,49 @@
+### Anotaciones propias del proyecto
+
+    - Proyecto creado por Luis Alamillo
+    - Tecnologías:
+        - HTML5
+        - CSS
+        - ReactJS
+        - Bootstrap
+        - yarn
+
+### Parte funcional
+
+    El proyecto consta de un tres en raya, creado para enfocar hacia una API REST creada en Symfony 4.
+    Toda la carga lógica del proyecto se encuentra en dicha api, quí solo se encuentra la lógica necesaria
+    para que react pueda ajustar bien los parámetros necesarios.
+
+    El tres en raya consta del modo IA y del 2 juegadores. Por defecto está colocado el modo IA.
+
+    Si se quiere cambiar el tipo de juego hará solo falta clickar sobre el que queramos. Esto
+    borrará el tablero que tenemos asociado.
+
+### Iniciando el proyecto
+
+    El proyecto consta de diversos archivos los cuales se deben cambiar para su correcto funcionamiento:
+
+        - .env:
+            Aquí deberemos cambiar la variable REACT_APP_API_SYMFONY por la que se encuentre alojado 
+            nuestra api del proyecto de Symfony.
+
+    Acto seguido haremos un "yarn install" y luego un "yarn start" para arrancar el servidor local.
+
+    En caso de encontrar algún tipo de fallo al arrancar el servidor se recomienda ejecutar
+    "yarn build"
+
+### Mejoras a largo plazo
+
+    - Creación de usuarios
+        - nombre
+        - partidas ganadas
+
+    - Records
+        - idUsuario
+        - partidas ganadas
+
+### Cosas por defecto del yarn
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
