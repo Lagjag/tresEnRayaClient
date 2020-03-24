@@ -47,7 +47,6 @@ class App extends React.Component {
             <a href="./?IA" className="boton-menu" onClick={this.cambioDeModo} id="ia">
               Contra IA
             </a>
-            ||
             <a href="./?2J" className="boton-menu" onClick={this.cambioDeModo} id="dosj">
               2 Jugadores
             </a>
@@ -57,8 +56,8 @@ class App extends React.Component {
           </p>
           <p className="letra-amarilla letra-cartel">Turno del jugador {String.fromCharCode(mapaSimbolos[this.state.turno][1])}</p>
           <div className="tablero">{filas}</div>
-          <p className="alert alert-success" role="alert" id="mensaje1"></p>
-          <p className="alert alert-info" role="alert" id="mensaje2"></p>
+          <p className="alert victoria" role="alert" id="mensaje1"></p>
+          <p className="alert empate" role="alert" id="mensaje2"></p>
         </div>
       </div>
     );
@@ -112,7 +111,7 @@ class App extends React.Component {
             String.fromCharCode(mapaSimbolos[response.data.fichaGanadora][1]) + " gana!";
             document.querySelector("#mensaje1").style.display = "block";
             response.data.casillasGanadoras.forEach(id => {
-              document.getElementById(id).parentNode.style.background = "#d4edda";
+              document.getElementById(id).parentNode.style.background = "#FFD700";
             });
             this.setState({ active: false });
           }
